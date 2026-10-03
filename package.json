@@ -1,0 +1,47 @@
+{
+  "name": "opencode-release-on-quit",
+  "version": "0.1.0",
+  "description": "OpenCode TUI plugin that releases a project's cached MCP/LSP services when you quit, and sweeps every loaded location once the last OpenCode client exits.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Angelo Quijano Orduña",
+  "homepage": "https://github.com/angeloper86/opencode-release-on-quit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/angeloper86/opencode-release-on-quit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/angeloper86/opencode-release-on-quit/issues"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "opencode-tui",
+    "mcp",
+    "memory"
+  ],
+  "engines": {
+    "opencode": ">=2.0.0"
+  },
+  "exports": {
+    "./tui": "./src/tui.ts"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "check:helper": "node --check src/evict-deferred.mjs",
+    "prepublishOnly": "npm run typecheck && npm run check:helper"
+  },
+  "dependencies": {
+    "@opencode/client": "^2.0.11",
+    "@opencode/plugin": "^2.0.11"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^7.0.2"
+  }
+}
