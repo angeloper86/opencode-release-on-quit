@@ -6,11 +6,13 @@
 
 An OpenCode **TUI plugin** that shuts down what a project keeps running after you leave: when you quit a window it releases that project's cached services (MCP, LSP), and when the last OpenCode client exits it sweeps every loaded location — so no MCP processes stay alive overnight.
 
+> **Community plugin.** Not built by, endorsed by, or affiliated with the OpenCode team.
+
 ## Why
 
-OpenCode v2 keeps per-project MCP servers warm inside its shared background service. Closing a session with `/exit` only closes the client: the project's processes stay running, and the service has no idle eviction. Over a day of opening several projects this can add up to gigabytes of processes you are no longer using.
+OpenCode v2 keeps per-project MCP servers and LSPs warm inside its shared background service. Closing a session with `/exit` only closes the client: the project's cached services are not released at that point — they wait for an inactivity timer (the location layer currently uses a 60-minute idle TTL) or for a capacity/dispose mechanism, regardless of whether any client still has that project open. Over a day of opening several projects this can add up to gigabytes of processes you are no longer using.
 
-This plugin makes `/exit` mean what you thought it meant.
+This plugin makes `/exit` mean what you thought it meant: the project you leave is released once its client is gone, and when the last client exits nothing stays behind.
 
 ## How it works
 
@@ -57,8 +59,15 @@ The helper appends a small log to `~/.local/share/opencode/release-on-quit.log`:
 
 ## Compatibility
 
-- Uses the server's experimental `debug.location.evict` endpoint. If a future OpenCode release removes or changes it, the helper logs the failure and nothing else happens — it fails soft.
+- Uses the server's experimental `debug.location.evict` endpoint. If a future OpenCode release removes or changes it, the helper logs the failure and nothing else happens — it fails soft. Known quirks of that endpoint are tracked upstream (for example, [anomalyco/opencode#51198](https://github.com/anomalyco/opencode/issues/51198)).
 - While other OpenCode clients stay open, a released location can be revived on demand by them. That is expected: the plugin never fights a live client.
+
+## Upstream
+
+The permanent fix belongs in the service, not in a client plugin:
+
+- [anomalyco/opencode#53068](https://github.com/anomalyco/opencode/issues/53068) — feature request to release a project's cached services when its last client exits. This plugin is cited there as prior art; if it helps you, your experience in that thread is useful evidence.
+- [anomalyco/opencode#52946](https://github.com/anomalyco/opencode/issues/52946) — in-flight core work that caps the per-directory MCP instance cache (LRU).
 
 ## Development
 
